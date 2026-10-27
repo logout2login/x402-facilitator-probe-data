@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>x402 Facilitator Status — Path Truth Probe</title>
+<meta name="description" content="Independent community monitoring of x402 facilitator endpoints. Evidence-based, free, no affiliation.">
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, system-ui, sans-serif; max-width: 760px;
+         margin: 0 auto; padding: 24px; background: #0d1117; color: #e6edf3; }
+  h1 { font-size: 1.4em; } h1 small { color: #8b949e; font-weight: normal; }
+  .banner { padding: 20px; border-radius: 10px; margin: 20px 0; }
+  .down { background: #2d1214; border: 1px solid #f85149; }
+  .up   { background: #0f2417; border: 1px solid #3fb950; }
+  .unknown { background: #1c1c1c; border: 1px solid #8b949e; }
+  .banner h2 { margin: 0 0 6px; font-size: 1.2em; }
+  .down h2 { color: #f85149; } .up h2 { color: #3fb950; } .unknown h2 { color: #d29922; }
+  .stats { display: flex; gap: 12px; margin: 16px 0; flex-wrap: wrap; }
+  .stat { flex: 1; min-width: 140px; background: #161b22; border: 1px solid #30363d;
+          border-radius: 8px; padding: 12px 16px; }
+  .stat .num { font-size: 1.6em; font-weight: bold; }
+  .stat .label { color: #8b949e; font-size: 0.8em; }
+  .ok { color: #3fb950; } .bad { color: #f85149; } .warn { color: #d29922; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { padding: 6px 10px; border-bottom: 1px solid #21262d;
+           text-align: left; font-size: 0.85em; }
+  th { color: #8b949e; font-weight: normal; }
+  code { background: #161b22; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px;
+          padding: 16px 20px; margin: 16px 0; }
+  .card h3 { margin: 0 0 8px; font-size: 1em; color: #58a6ff; }
+  .spark { display: flex; gap: 2px; align-items: flex-end; height: 40px; margin: 12px 0; }
+  .spark div { flex: 1; border-radius: 2px 2px 0 0; min-height: 4px; }
+  footer { color: #8b949e; font-size: 0.8em; margin-top: 32px;
+           border-top: 1px solid #21262d; padding-top: 16px; }
+  a { color: #58a6ff; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<h1>x402 Facilitator Status <small>· by Path Truth Probe</small></h1>
+<p class="meta" style="color:#8b949e">Independent community health monitoring. Not affiliated with x402, LF Projects, or Coinbase.</p>
+
+<!-- 狀態橫幅:JS 按 current_code 切換 -->
+<div id="banner" class="banner unknown">
+  <h2 id="banner-title">Loading…</h2>
+  <p id="banner-detail" class="meta"></p>
+</div>
+
+<!-- 三大數字 -->
+<div class="stats">
+  <div class="stat"><div class="num" id="s-code">—</div><div class="label">Current HTTP code</div></div>
+  <div class="stat"><div class="num" id="s-uptime">—</div><div class="label">24h uptime (verified)</div></div>
+  <div class="stat"><div class="num" id="s-last500">—</div><div class="label">Last confirmed 500</div></div>
+</div>
+
+<!-- 24h sparkline -->
+<div class="card">
+  <h3>Last 24 hours — probe results</h3>
+  <div class="spark" id="spark"></div>
+  <p class="meta" style="font-size:0.75em">Each bar = one probe (every 10 min, last 48h kept). Green = 200, red = 5xx, grey = other (incl. 4xx/timeout).</p>
+</div>
+
+<!-- 監測對象 -->
+<div class="card">
+  <h3>Monitored endpoints</h3>
+  <table>
+    <tr><th>Endpoint</th><th>Role</th><th>Method</th></tr>
+    <tr><td><code>https://x402.org/facilitator</code></td><td>Default facilitator (legacy samples)</td><td>HEAD + GET</td></tr>
+    <!-- 之後加更多:CDP facilitator、其他公共 facilitator -->
+  </table>
+</div>
+
+<!-- 修法卡:呢個係轉化位 -->
+<div class="card">
+  <h3>Affected? The 30-second fix</h3>
+  <p>If your x402 seller endpoint uses the default sample configuration pointing to
+     <code>x402.org/facilitator</code>, buyers can sign payments but settlement never
+     completes — you see traffic with zero payouts.</p>
+  <p><strong>Fix:</strong> point your facilitator to
+     <a href="https://docs.cdp.coinbase.com">Coinbase CDP facilitator</a> or a
+     self-hosted instance. Reference template:
+     <a href="https://github.com/logout2login/seed-seller-v1">seed-seller-v1 (public reference implementation)</a>.</p>
+  <p style="color:#8b949e;font-size:0.85em">Free diagnosis of your own endpoint:
+     <a href="https://ownsite-aeo.jerry-aeo.workers.dev/x402-facilitator-probe.html">Path Truth Probe</a> — no charge, no sign-up.</p>
+</div>
+
+<footer>
+  Methodology: HTTP GET/HEAD probes every 10 minutes (48h campaign = 288 points)
+  from a single independent probe vantage point: Asia/HK residential uplink (local origin,
+  tagged in every data point). Raw log:
+  <a href="https://raw.githubusercontent.com/logout2login/x402-facilitator-probe-data/main/probe.log">probe.log</a> ·
+  Data: <a href="https://raw.githubusercontent.com/logout2login/x402-facilitator-probe-data/main/status.json">status.json</a> ·
+  Full evidence: <a href="https://raw.githubusercontent.com/logout2login/x402-facilitator-probe-data/main/probe_evidence.jsonl">probe_evidence.jsonl</a><br>
+  This is evidence, not speculation. Last page render: <span id="render-time"></span>
+</footer>
+
+<script>
+const RED='#f85149', GREEN='#3fb950', GREY='#30363d';
+const DATA_URLS=[
+  'https://raw.githubusercontent.com/logout2login/x402-facilitator-probe-data/main/status.json?t='+Date.now(),
+  'status.json?t='+Date.now()
+];
+const loadStatus=(urls,i)=>{
+  if(i>=urls.length) return Promise.reject(new Error('no data source'));
+  return fetch(urls[i]).then(r=>{ if(!r.ok) throw 0; return r.json(); }).catch(()=>loadStatus(urls,i+1));
+};
+loadStatus(DATA_URLS,0).then(d=>{
+  const b=document.getElementById('banner'), t=document.getElementById('banner-title'),
+        dt=document.getElementById('banner-detail');
+  if(d.current_code==='200'){
+    b.className='banner up'; t.textContent='✓ Operational';
+    dt.textContent='Facilitator responded 200 at '+d.last_check;
+  } else if(d.current_code && d.current_code.startsWith('5')){
+    b.className='banner down'; t.textContent='✗ Down — HTTP '+d.current_code;
+    dt.textContent='Consistently failing as of '+d.last_check+
+      '. If you use this facilitator, see the fix below.';
+  } else {
+    b.className='banner unknown'; t.textContent='? '+ (d.current_code||'No response');
+    dt.textContent='Non-5xx abnormal response at '+d.last_check;
+  }
+  document.getElementById('s-code').textContent=d.current_code||'—';
+  document.getElementById('s-code').className='num '+(d.current_code==='200'?'ok':'bad');
+  const u = d.uptime_24h;
+  document.getElementById('s-uptime').textContent =
+    u==null ? '—' : (typeof u==='number' ? u.toFixed(0)+'%' : u);
+  document.getElementById('s-uptime').className='num '+
+    (u!=null && (typeof u==='number' ? u : parseFloat(u))>=95?'ok':(u!=null?'bad':'warn'));
+  document.getElementById('s-last500').textContent =
+    d.last_500 ? d.last_500.slice(0,16).replace('T',' ') : 'none recorded';
+  // sparkline
+  const sp=document.getElementById('spark'); sp.innerHTML='';
+  (d.points||[]).slice(-144).reverse().forEach(p=>{
+    const bar=document.createElement('div');
+    bar.style.height = p.code==='200' ? '100%' : '40%';
+    bar.style.background = p.code==='200'?GREEN:(p.code&&p.code.startsWith('5')?RED:GREY);
+    bar.title = p.t+' → '+p.code+' ('+p.ms+'ms)';
+    sp.appendChild(bar);
+  });
+}).catch(()=>{
+  document.getElementById('banner-title').textContent='Status data unavailable';
+});
+document.getElementById('render-time').textContent=new Date().toISOString();
+</script>
+</body>
+</html>
